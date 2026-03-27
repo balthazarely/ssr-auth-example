@@ -1,6 +1,6 @@
 "use server";
 
-import { createSupabaseClient } from "../lib/supabase/server";
+import { createSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function createAccountAction(formData: FormData) {
@@ -12,7 +12,7 @@ export async function createAccountAction(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  redirect("/");
+  redirect("/home");
 }
 
 export async function loginAction(formData: FormData) {
@@ -24,7 +24,7 @@ export async function loginAction(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  redirect("/");
+  redirect("/home");
 }
 
 export async function logoutAction() {

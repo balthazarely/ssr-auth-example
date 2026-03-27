@@ -1,6 +1,6 @@
 "use client";
 
-import { loginAction, signInWithGoogleAction } from "@/app/actions/users";
+import { loginAction, signInWithGoogleAction } from "@/actions/users";
 import { startTransition } from "react";
 
 export default function LoginPage() {

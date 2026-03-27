@@ -1,6 +1,6 @@
 "use client";
 
-import { createAccountAction } from "@/app/actions/users";
+import { createAccountAction } from "@/actions/users";
 import { startTransition } from "react";
 
 export default function SignupPage() {
