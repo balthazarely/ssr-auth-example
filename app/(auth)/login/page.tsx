@@ -58,7 +58,7 @@ export default function LoginPage() {
         </div>
         <button
           type="button"
-          onClick={() => startTransition(() => signInWithGoogleAction())}
+          onClick={() => startTransition(async () => { await signInWithGoogleAction(); })}
           className="w-full rounded border py-2 text-sm font-medium hover:bg-gray-50"
         >
           Continue with Google
