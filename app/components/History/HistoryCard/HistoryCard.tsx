@@ -23,6 +23,7 @@ import EditWorkoutDialog from "@/app/components/History/EditWorkoutDialog/EditWo
 import { deleteWorkoutAction } from "@/actions/workouts";
 import { ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
+import { WeightUnit, toDisplayWeight } from "@/lib/units";
 
 interface WorkoutSet {
   id: string;
@@ -51,9 +52,10 @@ interface WorkoutHistoryItem {
 interface Props {
   workout: WorkoutHistoryItem;
   exercises: Exercise[];
+  preferredUnits: WeightUnit;
 }
 
-export default function HistoryCard({ workout, exercises }: Props) {
+export default function HistoryCard({ workout, exercises, preferredUnits }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -133,7 +135,7 @@ export default function HistoryCard({ workout, exercises }: Props) {
                     className="flex items-center gap-2 text-xs text-muted-foreground"
                   >
                     <span className="w-12">Set {i + 1}</span>
-                    <span>{s.weight} lbs</span>
+                    <span>{toDisplayWeight(s.weight, preferredUnits)} {preferredUnits}</span>
                     <span>·</span>
                     <span>{s.reps} reps</span>
                   </div>
@@ -167,6 +169,7 @@ export default function HistoryCard({ workout, exercises }: Props) {
         initialBlocks={initialBlocks}
         initialName={workout.name}
         workoutId={workout.id}
+        preferredUnits={preferredUnits}
       />
     </>
   );

@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import NewWorkout from "@/app/components/Workout/NewWorkout/NewWorkout";
 import { isWorkoutInProgress, markWorkoutStarted } from "@/hooks/useWorkoutDraft";
 import { Exercise } from "@/types/excercises";
+import { WeightUnit } from "@/lib/units";
 
 interface Props {
   exercises: Exercise[];
   userId?: string;
+  preferredUnits?: WeightUnit;
 }
 
-export default function WorkoutStarter({ exercises, userId }: Props) {
+export default function WorkoutStarter({ exercises, userId, preferredUnits = "lbs" }: Props) {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
@@ -39,5 +41,5 @@ export default function WorkoutStarter({ exercises, userId }: Props) {
     );
   }
 
-  return <NewWorkout exercises={exercises} userId={userId} />;
+  return <NewWorkout exercises={exercises} userId={userId} preferredUnits={preferredUnits} />;
 }

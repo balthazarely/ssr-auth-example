@@ -13,7 +13,7 @@ export default async function Navbar() {
   const user = await getUser();
 
   return (
-    <nav className="hidden border-b bg-background px-6 py-3 sm:block">
+    <nav className="sticky top-0 z-50 hidden border-b bg-background px-6 py-3 sm:block">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/home" className="font-semibold">

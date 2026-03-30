@@ -28,6 +28,7 @@ import {
 import { ActiveExerciseSets, ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
 import { saveWorkoutAction, updateWorkoutAction } from "@/actions/workouts";
+import { WeightUnit, toStoredLbs } from "@/lib/units";
 
 interface Props {
   exercises: Exercise[];
@@ -35,6 +36,7 @@ interface Props {
   initialName?: string;
   workoutId?: string;
   userId?: string;
+  preferredUnits?: WeightUnit;
   onSaveSuccess?: () => void;
 }
 
@@ -44,6 +46,7 @@ export default function NewWorkout({
   initialName,
   workoutId,
   userId,
+  preferredUnits = "lbs",
   onSaveSuccess,
 }: Props) {
   const isEditing = !!workoutId;
@@ -123,16 +126,20 @@ export default function NewWorkout({
 
   const handleSaveWorkout = () => {
     startTransition(async () => {
+      const convertedBlocks = blocks.map((block) => ({
+        ...block,
+        sets: block.sets.map((set) => ({
+          ...set,
+          weight: toStoredLbs(set.weight, preferredUnits),
+        })),
+      }));
+
       if (isEditing) {
-        await updateWorkoutAction(
-          workoutId,
-          blocks,
-          workoutName || undefined,
-        );
+        await updateWorkoutAction(workoutId, convertedBlocks, workoutName || undefined);
         onSaveSuccess?.();
       } else {
         clearDraft();
-        await saveWorkoutAction(blocks, workoutName || undefined, startedAt ?? undefined);
+        await saveWorkoutAction(convertedBlocks, workoutName || undefined, startedAt ?? undefined);
       }
     });
   };
@@ -174,6 +181,7 @@ export default function NewWorkout({
           sets={block.sets}
           workoutId={workoutId}
           excerciseName={block.excerciseName}
+          preferredUnits={preferredUnits}
           onChangeSet={(setIndex, field, value) =>
             handleChangeSet(blockIndex, setIndex, field, value)
           }

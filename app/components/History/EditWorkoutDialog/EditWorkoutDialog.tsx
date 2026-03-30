@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import NewWorkout from "@/app/components/Workout/NewWorkout/NewWorkout";
 import { ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
+import { WeightUnit } from "@/lib/units";
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
   initialBlocks: ActiveExerciseBlock[];
   initialName: string;
   workoutId: string;
+  preferredUnits: WeightUnit;
 }
 
 export default function EditWorkoutDialog({
@@ -21,6 +23,7 @@ export default function EditWorkoutDialog({
   initialBlocks,
   initialName,
   workoutId,
+  preferredUnits,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,6 +36,7 @@ export default function EditWorkoutDialog({
           initialBlocks={initialBlocks}
           initialName={initialName}
           workoutId={workoutId}
+          preferredUnits={preferredUnits}
           onSaveSuccess={() => onOpenChange(false)}
         />
       </DialogContent>

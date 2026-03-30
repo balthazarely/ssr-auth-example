@@ -28,6 +28,8 @@ interface Props {
 }
 
 export default function WorkoutWeekChart({ data }: Props) {
+  const hasData = data.some((d) => d.workouts > 0);
+
   return (
     <Card>
       <CardHeader>
@@ -35,6 +37,9 @@ export default function WorkoutWeekChart({ data }: Props) {
         <CardDescription>Last 8 weeks</CardDescription>
       </CardHeader>
       <CardContent>
+        {!hasData ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">No workout data yet</p>
+        ) : (
         <ChartContainer config={chartConfig}>
           <BarChart data={data} accessibilityLayer>
             <CartesianGrid vertical={false} />
@@ -58,6 +63,7 @@ export default function WorkoutWeekChart({ data }: Props) {
             <Bar dataKey="workouts" fill="var(--color-workouts)" radius={6} />
           </BarChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

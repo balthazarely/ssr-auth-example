@@ -29,7 +29,7 @@ export default async function ExercisesPage() {
         <div className="flex flex-col gap-6">
           {sortedGroups.map((group) => (
             <div key={group}>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground capitalize">
+              <h2 className="mb-2 text-xs font-semibold  tracking-wider text-muted-foreground capitalize">
                 {group}
               </h2>
               <div className="flex flex-col overflow-hidden rounded-xl border">

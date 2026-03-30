@@ -9,11 +9,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ActiveExerciseSets } from "@/types";
+import { WeightUnit } from "@/lib/units";
 
 interface Props {
   sets: ActiveExerciseSets[];
   excerciseName: string;
   workoutId: string | undefined;
+  preferredUnits: WeightUnit;
   onChangeSet: (
     index: number,
     field: keyof ActiveExerciseSets,
@@ -28,6 +30,7 @@ export default function Exercise({
   sets,
   excerciseName,
   workoutId,
+  preferredUnits,
   onChangeSet,
   onAddSet,
   onDeleteSet,
@@ -57,7 +60,7 @@ export default function Exercise({
       </div>
       <div className="grid grid-cols-[2rem_1fr_1fr_2rem_2rem] items-center gap-2 px-1 text-xs font-medium text-muted-foreground">
         <span>Set</span>
-        <span>Weight (lbs)</span>
+        <span>Weight ({preferredUnits})</span>
         <span>Reps</span>
         {!workoutId && <span>Done</span>}
         <span />
