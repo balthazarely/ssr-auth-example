@@ -1,27 +1,50 @@
 "use client";
 
+import { useTransition, useState } from "react";
+import { useRouter } from "next/navigation";
 import Exercises from "../Exercise/Exercise";
 import AddExerciseDialog from "../AddExerciseDialog/AddExerciseDialog";
+import WorkoutTimer from "../WorkoutTimer/WorkoutTimer";
+import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 import { ActiveExerciseSets, ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
-import { startTransition, useState } from "react";
 import { saveWorkoutAction, updateWorkoutAction } from "@/actions/workouts";
-import { Input } from "@/components/ui/input";
 
 interface Props {
   exercises: Exercise[];
   initialBlocks?: ActiveExerciseBlock[];
   initialName?: string;
   workoutId?: string;
+  userId?: string;
   onSaveSuccess?: () => void;
 }
 
-export default function NewWorkout({ exercises, initialBlocks, initialName, workoutId, onSaveSuccess }: Props) {
-  const [blocks, setBlocks] = useState<ActiveExerciseBlock[]>(initialBlocks ?? []);
+export default function NewWorkout({
+  exercises,
+  initialBlocks,
+  initialName,
+  workoutId,
+  userId,
+  onSaveSuccess,
+}: Props) {
+  const isEditing = !!workoutId;
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [workoutName, setWorkoutName] = useState(initialName ?? "");
+  const [isSaving, startTransition] = useTransition();
+  const router = useRouter();
 
+  const { blocks, setBlocks, workoutName, setWorkoutName, startedAt, clearDraft } =
+    useWorkoutDraft(!isEditing, initialBlocks, initialName, userId);
+
+  // --- block helpers ---
   const updateBlock = (
     blockIndex: number,
     updater: (block: ActiveExerciseBlock) => ActiveExerciseBlock,
@@ -29,6 +52,23 @@ export default function NewWorkout({ exercises, initialBlocks, initialName, work
     setBlocks((prev) =>
       prev.map((block, i) => (i === blockIndex ? updater(block) : block)),
     );
+  };
+
+  const handleAddSet = (blockIndex: number) => {
+    updateBlock(blockIndex, (block) => {
+      const last = block.sets[block.sets.length - 1];
+      const newSet = last
+        ? { weight: last.weight, reps: last.reps, isCompleted: false }
+        : { weight: 0, reps: 0, isCompleted: false };
+      return { ...block, sets: [...block.sets, newSet] };
+    });
+  };
+
+  const handleDeleteSet = (blockIndex: number, setIndex: number) => {
+    updateBlock(blockIndex, (block) => ({
+      ...block,
+      sets: block.sets.filter((_, j) => j !== setIndex),
+    }));
   };
 
   const handleChangeSet = (
@@ -50,34 +90,16 @@ export default function NewWorkout({ exercises, initialBlocks, initialName, work
     }));
   };
 
-  const handleAddSet = (blockIndex: number) => {
-    updateBlock(blockIndex, (block) => {
-      const last = block.sets[block.sets.length - 1];
-      return {
-        ...block,
-        sets: [
-          ...block.sets,
-          { weight: last.weight, reps: last.reps, isCompleted: false },
-        ],
-      };
-    });
-  };
-
   const handleRemoveBlock = (blockIndex: number) => {
     setBlocks((prev) => prev.filter((_, i) => i !== blockIndex));
   };
 
-  const handleDeleteSet = (blockIndex: number, setIndex: number) => {
-    updateBlock(blockIndex, (block) => ({
-      ...block,
-      sets: block.sets.filter((_, j) => j !== setIndex),
-    }));
-  };
+  // --- dialog ---
 
-  const handleSelectExercise = (exercises: Exercise[]) => {
+  const handleSelectExercise = (selected: Exercise[]) => {
     setBlocks((prev) => [
       ...prev,
-      ...exercises.map((exercise) => ({
+      ...selected.map((exercise) => ({
         exerciseId: exercise.id,
         excerciseName: exercise.name,
         sets: [{ weight: 0, reps: 0, isCompleted: false }],
@@ -86,12 +108,19 @@ export default function NewWorkout({ exercises, initialBlocks, initialName, work
     setDialogOpen(false);
   };
 
+  // --- save ---
+
   const handleSaveWorkout = () => {
     startTransition(async () => {
-      if (workoutId) {
-        await updateWorkoutAction(workoutId, blocks, workoutName || undefined);
+      if (isEditing) {
+        await updateWorkoutAction(
+          workoutId,
+          blocks,
+          workoutName || undefined,
+        );
         onSaveSuccess?.();
       } else {
+        clearDraft();
         await saveWorkoutAction(blocks, workoutName || undefined);
       }
     });
@@ -99,16 +128,40 @@ export default function NewWorkout({ exercises, initialBlocks, initialName, work
 
   return (
     <div className="flex flex-col gap-6">
-      <Input
-        placeholder="Workout name (e.g. Monday Push)"
-        value={workoutName}
-        onChange={(e) => setWorkoutName(e.target.value)}
-        className="text-base font-medium"
-      />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Workout name (e.g. Monday Push)"
+            value={workoutName}
+            onChange={(e) => setWorkoutName(e.target.value)}
+            className="text-lg font-medium"
+          />
+          {!isEditing && startedAt && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => { clearDraft(); router.push("/history"); }}
+                >
+                  Cancel Workout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+        {!isEditing && startedAt && <WorkoutTimer startedAt={startedAt} />}
+      </div>
+
       {blocks.map((block, blockIndex) => (
         <Exercises
           key={blockIndex}
           sets={block.sets}
+          workoutId={workoutId}
           excerciseName={block.excerciseName}
           onChangeSet={(setIndex, field, value) =>
             handleChangeSet(blockIndex, setIndex, field, value)
@@ -119,13 +172,13 @@ export default function NewWorkout({ exercises, initialBlocks, initialName, work
         />
       ))}
 
-      <Button onClick={() => setDialogOpen(true)}>Add Exercise</Button>
-      <Button
-        disabled={blocks.length === 0}
-        onClick={() => handleSaveWorkout()}
-      >
-        Save WorkOut
+      <Button variant="outline" onClick={() => setDialogOpen(true)}>
+        Add Exercise
       </Button>
+      <Button size="lg" disabled={blocks.length === 0 || isSaving} onClick={handleSaveWorkout}>
+        {isSaving ? "Saving..." : "Save Workout"}
+      </Button>
+
       <AddExerciseDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

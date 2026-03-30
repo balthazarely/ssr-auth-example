@@ -8,6 +8,8 @@ export default async function HistoryPage() {
     getAllExercises(),
   ]);
 
+  console.log("History Page");
+
   return (
     <div className="p-8">
       <div className="mx-auto max-w-xl">
@@ -17,7 +19,11 @@ export default async function HistoryPage() {
         )}
         <div className="flex flex-col gap-4">
           {history.map((workout) => (
-            <HistoryCard key={workout.id} workout={workout} exercises={exercises} />
+            <HistoryCard
+              key={workout.id}
+              workout={workout}
+              exercises={exercises}
+            />
           ))}
         </div>
       </div>

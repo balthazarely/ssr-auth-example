@@ -122,3 +122,22 @@ export async function updateWorkoutAction(
 
   revalidatePath("/history");
 }
+
+export async function deleteWorkoutAction(workoutId: string) {
+  const supabase = await createSupabaseClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from("workouts")
+    .delete()
+    .eq("id", workoutId)
+    .eq("user_id", user.id);
+
+  if (error) throw error;
+
+  revalidatePath("/history");
+}

@@ -1,8 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import EditWorkoutDialog from "@/app/components/History/EditWorkoutDialog/EditWorkoutDialog";
+import { deleteWorkoutAction } from "@/actions/workouts";
 import { ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
 
@@ -36,6 +54,13 @@ interface Props {
 
 export default function HistoryCard({ workout, exercises }: Props) {
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await deleteWorkoutAction(workout.id);
+    });
+  };
 
   const date = new Date(workout.completed_at).toLocaleDateString("en-US", {
     weekday: "short",
@@ -43,15 +68,17 @@ export default function HistoryCard({ workout, exercises }: Props) {
     day: "numeric",
   });
 
-  const initialBlocks: ActiveExerciseBlock[] = workout.workout_exercises.map((ex) => ({
-    exerciseId: ex.exercise_id,
-    excerciseName: ex.exercise_name,
-    sets: ex.workout_sets.map((s) => ({
-      weight: s.weight,
-      reps: s.reps,
-      isCompleted: s.is_completed,
-    })),
-  }));
+  const initialBlocks: ActiveExerciseBlock[] = workout.workout_exercises.map(
+    (ex) => ({
+      exerciseId: ex.exercise_id,
+      excerciseName: ex.exercise_name,
+      sets: ex.workout_sets.map((s) => ({
+        weight: s.weight,
+        reps: s.reps,
+        isCompleted: s.is_completed,
+      })),
+    }),
+  );
 
   return (
     <>
@@ -61,26 +88,63 @@ export default function HistoryCard({ workout, exercises }: Props) {
             <p className="font-semibold text-card-foreground">{workout.name}</p>
             <p className="text-xs text-muted-foreground">{date}</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            Edit
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex flex-col gap-1.5">
           {workout.workout_exercises.map((ex) => (
-            <div
-              key={ex.id}
-              className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
-            >
-              <span className="text-sm font-medium">{ex.exercise_name}</span>
-              <span className="text-xs text-muted-foreground">
-                {ex.workout_sets.length} sets ·{" "}
-                {ex.workout_sets.map((s) => `${s.weight}×${s.reps}`).join(", ")}
-              </span>
+            <div key={ex.id} className="rounded-lg bg-muted px-3 py-2">
+              <p className="text-sm font-medium">{ex.exercise_name}</p>
+              <div className="mt-1 flex flex-col gap-0.5">
+                {ex.workout_sets.map((s, i) => (
+                  <div
+                    key={s.id}
+                    className="flex items-center gap-2 text-xs text-muted-foreground"
+                  >
+                    <span className="w-12">Set {i + 1}</span>
+                    <span>{s.weight} lbs</span>
+                    <span>·</span>
+                    <span>{s.reps} reps</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete workout?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{workout.name}</strong>. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <EditWorkoutDialog
         open={editOpen}

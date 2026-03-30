@@ -13,6 +13,7 @@ import { ActiveExerciseSets } from "@/types";
 interface Props {
   sets: ActiveExerciseSets[];
   excerciseName: string;
+  workoutId: string | undefined;
   onChangeSet: (
     index: number,
     field: keyof ActiveExerciseSets,
@@ -26,6 +27,7 @@ interface Props {
 export default function Exercise({
   sets,
   excerciseName,
+  workoutId,
   onChangeSet,
   onAddSet,
   onDeleteSet,
@@ -57,14 +59,14 @@ export default function Exercise({
         <span>Set</span>
         <span>Weight (lbs)</span>
         <span>Reps</span>
-        <span>Done</span>
+        {!workoutId && <span>Done</span>}
         <span />
       </div>
 
       {sets.map((set, index) => (
         <div
           key={index}
-          className="grid grid-cols-[2rem_1fr_1fr_2rem_2rem] items-center gap-2"
+          className={`grid grid-cols-[2rem_1fr_1fr_2rem_2rem] items-center gap-2 rounded-lg px-1 py-0.5 transition-colors ${set.isCompleted ? "bg-green-500/10" : ""}`}
         >
           <span className="text-center text-sm font-medium text-muted-foreground">
             {index + 1}
@@ -81,14 +83,16 @@ export default function Exercise({
             onChange={(e) => onChangeSet(index, "reps", e.target.value)}
             className="h-9 text-center"
           />
-          <input
-            type="checkbox"
-            checked={set.isCompleted}
-            onChange={(e) =>
-              onChangeSet(index, "isCompleted", e.target.checked)
-            }
-            className="mx-auto h-4 w-4 cursor-pointer accent-primary"
-          />
+          {!workoutId && (
+            <input
+              type="checkbox"
+              checked={set.isCompleted}
+              onChange={(e) =>
+                onChangeSet(index, "isCompleted", e.target.checked)
+              }
+              className="mx-auto h-4 w-4 cursor-pointer accent-primary"
+            />
+          )}
           <button
             onClick={() => onDeleteSet(index)}
             className="text-xs text-muted-foreground hover:text-destructive"
