@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,10 +20,11 @@ const THEMES = ["light", "dark"] as const;
 
 export default function ProfileForm({ profile }: { profile: UserProfile }) {
   const [units, setUnits] = useState(profile.preferred_units ?? "lbs");
-  const [theme, setTheme] = useState(profile.theme ?? "dark");
+  const [theme, setThemeState] = useState(profile.theme ?? "dark");
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setTheme } = useTheme();
 
   const handleSave = () => {
     setError(null);
@@ -30,6 +32,7 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
     startTransition(async () => {
       try {
         await updateUserProfileAction({ preferred_units: units, theme });
+        setTheme(theme);
         setSaved(true);
       } catch {
         setError("Failed to save changes. Please try again.");
@@ -40,6 +43,10 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
   const isDirty =
     units !== (profile.preferred_units ?? "lbs") ||
     theme !== (profile.theme ?? "dark");
+
+  const handleThemeChange = (v: string) => {
+    setThemeState(v);
+  };
 
   return (
     <Card>
@@ -65,7 +72,7 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
 
         <div className="flex flex-col gap-1.5">
           <Label>Theme</Label>
-          <Select value={theme} onValueChange={setTheme}>
+          <Select value={theme} onValueChange={handleThemeChange}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
