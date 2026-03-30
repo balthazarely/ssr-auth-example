@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 export async function saveWorkoutAction(
   blocks: ActiveExerciseBlock[],
   name?: string,
+  startedAt?: number,
 ) {
   const supabase = await createSupabaseClient();
 
@@ -19,7 +20,11 @@ export async function saveWorkoutAction(
   // 1. create the workout
   const { data: workout, error: workoutError } = await supabase
     .from("workouts")
-    .insert({ user_id: user.id, name: name ?? "Workout" })
+    .insert({
+      user_id: user.id,
+      name: name ?? "Workout",
+      started_at: startedAt ? new Date(startedAt).toISOString() : null,
+    })
     .select()
     .single();
 

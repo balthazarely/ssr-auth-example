@@ -16,10 +16,17 @@ interface Props {
 export default function AddExerciseDialog({ open, onOpenChange, exercises, onSelect }: Props) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Exercise[]>([]);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
 
-  const filteredExercises = exercises.filter((e) =>
-    e.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const muscleGroups = Array.from(
+    new Set(exercises.map((e) => e.muscle_group).filter(Boolean))
+  ).sort() as string[];
+
+  const filteredExercises = exercises.filter((e) => {
+    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
+    const matchesGroup = activeGroup ? e.muscle_group === activeGroup : true;
+    return matchesSearch && matchesGroup;
+  });
 
   const toggleExercise = (exercise: Exercise) => {
     setSelected((prev) =>
@@ -40,6 +47,7 @@ export default function AddExerciseDialog({ open, onOpenChange, exercises, onSel
     if (!open) {
       setSearch("");
       setSelected([]);
+      setActiveGroup(null);
     }
     onOpenChange(open);
   };
@@ -55,6 +63,31 @@ export default function AddExerciseDialog({ open, onOpenChange, exercises, onSel
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setActiveGroup(null)}
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              activeGroup === null
+                ? "border-primary bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            All
+          </button>
+          {muscleGroups.map((group) => (
+            <button
+              key={group}
+              onClick={() => setActiveGroup(activeGroup === group ? null : group)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
+                activeGroup === group
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {group}
+            </button>
+          ))}
+        </div>
         <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
           {filteredExercises.length === 0 && (
             <p className="py-4 text-center text-sm text-muted-foreground">No exercises found</p>

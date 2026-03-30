@@ -43,6 +43,7 @@ interface WorkoutExercise {
 interface WorkoutHistoryItem {
   id: string;
   name: string;
+  started_at: string | null;
   completed_at: string;
   workout_exercises: WorkoutExercise[];
 }
@@ -68,6 +69,16 @@ export default function HistoryCard({ workout, exercises }: Props) {
     day: "numeric",
   });
 
+  console.log(workout);
+
+  const duration = (() => {
+    if (!workout.started_at) return null;
+    const ms = new Date(workout.completed_at).getTime() - new Date(workout.started_at).getTime();
+    const mins = Math.floor(ms / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  })();
+
   const initialBlocks: ActiveExerciseBlock[] = workout.workout_exercises.map(
     (ex) => ({
       exerciseId: ex.exercise_id,
@@ -86,7 +97,10 @@ export default function HistoryCard({ workout, exercises }: Props) {
         <div className="mb-3 flex items-start justify-between">
           <div>
             <p className="font-semibold text-card-foreground">{workout.name}</p>
-            <p className="text-xs text-muted-foreground">{date}</p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{date}</span>
+              {duration && <><span>·</span><span>{duration}</span></>}
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

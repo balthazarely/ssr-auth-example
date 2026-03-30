@@ -5,6 +5,7 @@ import Link from "next/link";
 const navLinks = [
   { href: "/workout", label: "New Workout" },
   { href: "/history", label: "History" },
+  { href: "/exercises", label: "Exercises" },
   { href: "/settings", label: "Settings" },
 ];
 
@@ -12,7 +13,7 @@ export default async function Navbar() {
   const user = await getUser();
 
   return (
-    <nav className="border-b bg-background px-6 py-3">
+    <nav className="hidden border-b bg-background px-6 py-3 sm:block">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/home" className="font-semibold">

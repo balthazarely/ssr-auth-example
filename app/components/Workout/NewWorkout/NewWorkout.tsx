@@ -15,6 +15,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ActiveExerciseSets, ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
 import { saveWorkoutAction, updateWorkoutAction } from "@/actions/workouts";
@@ -38,6 +48,7 @@ export default function NewWorkout({
 }: Props) {
   const isEditing = !!workoutId;
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [isSaving, startTransition] = useTransition();
   const router = useRouter();
 
@@ -121,7 +132,7 @@ export default function NewWorkout({
         onSaveSuccess?.();
       } else {
         clearDraft();
-        await saveWorkoutAction(blocks, workoutName || undefined);
+        await saveWorkoutAction(blocks, workoutName || undefined, startedAt ?? undefined);
       }
     });
   };
@@ -146,7 +157,7 @@ export default function NewWorkout({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
-                  onClick={() => { clearDraft(); router.push("/history"); }}
+                  onClick={() => setCancelOpen(true)}
                 >
                   Cancel Workout
                 </DropdownMenuItem>
@@ -185,6 +196,23 @@ export default function NewWorkout({
         exercises={exercises}
         onSelect={handleSelectExercise}
       />
+
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel workout?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be lost. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Going</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { clearDraft(); router.push("/history"); }}>
+              Cancel Workout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

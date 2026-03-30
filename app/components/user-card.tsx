@@ -10,27 +10,43 @@ export default function UserCard({ user }: { user: User }) {
       })
     : null;
 
+  const initials = user.email?.[0].toUpperCase() ?? "?";
+
   return (
-    <div className="rounded-xl border bg-black p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black text-xl font-semibold text-white">
-          {user.email?.[0].toUpperCase() ?? "?"}
+    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      {/* Header */}
+      <div className="flex items-center gap-4 border-b bg-muted/40 px-6 py-5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground">
+          {initials}
         </div>
-        <div>
-          <p className="font-semibold">{user.email}</p>
-          <p className="text-sm capitalize text-gray-500">{provider}</p>
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{user.email}</p>
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium capitalize text-primary">
+              {provider}
+            </span>
+            {user.email_confirmed_at && (
+              <span className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
+                Verified
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="divide-y border-t">
+      {/* Details */}
+      <div className="divide-y px-6">
         <Row label="User ID" value={user.id} mono />
-        <Row label="Email" value={user.email} />
-        <Row
-          label="Email verified"
-          value={user.email_confirmed_at ? "Yes" : "No"}
-        />
-        <Row label="Auth provider" value={provider} capitalize />
         <Row label="Member since" value={createdAt} />
+        <Row label="Last sign in" value={
+          user.last_sign_in_at
+            ? new Date(user.last_sign_in_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            : null
+        } />
       </div>
     </div>
   );
@@ -40,18 +56,16 @@ function Row({
   label,
   value,
   mono,
-  capitalize,
 }: {
   label: string;
   value?: string | null;
   mono?: boolean;
-  capitalize?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between py-3">
-      <span className="text-sm text-gray-500">{label}</span>
+    <div className="flex items-center justify-between py-3.5">
+      <span className="text-sm text-muted-foreground">{label}</span>
       <span
-        className={`text-sm font-medium ${mono ? "font-mono text-xs" : ""} ${capitalize ? "capitalize" : ""}`}
+        className={`text-sm font-medium ${mono ? "font-mono text-xs text-muted-foreground" : ""}`}
       >
         {value ?? "—"}
       </span>
