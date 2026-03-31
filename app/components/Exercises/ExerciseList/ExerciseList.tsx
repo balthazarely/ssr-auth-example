@@ -105,25 +105,28 @@ export default function ExerciseList({ exercises, userId }: Props) {
       </div>
 
       {sortedGroups.length === 0 && (
-        <p className="py-8 text-center text-sm text-muted-foreground">No exercises found</p>
+        <div className="rounded-xl border bg-card py-12 text-center shadow-sm">
+          <p className="font-semibold">No exercises found</p>
+          <p className="mt-1 text-sm text-muted-foreground">Try adjusting your search or filters.</p>
+        </div>
       )}
 
       <div className="flex flex-col gap-6">
         {sortedGroups.map((group) => (
           <div key={group}>
-            <h2 className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground capitalize">
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {group}
             </h2>
-            <div className="flex flex-col overflow-hidden rounded-xl border">
+            <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
               {grouped[group].map((ex, i) => (
                 <div
                   key={ex.id}
-                  className={`flex items-center justify-between px-4 py-3 ${
+                  className={`flex items-center justify-between px-4 py-3.5 ${
                     i !== grouped[group].length - 1 ? "border-b" : ""
                   }`}
                 >
                   <Link href={`/exercises/${ex.id}`} className="flex-1">
-                    <p className="text-sm font-medium">{ex.name}</p>
+                    <p className="text-sm font-semibold">{ex.name}</p>
                     {ex.equipment && (
                       <p className="text-xs text-muted-foreground capitalize">{ex.equipment}</p>
                     )}

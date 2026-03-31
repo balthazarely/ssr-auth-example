@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateUserProfileAction } from "@/actions/users";
 import { UserProfile } from "@/lib/users/users";
 
@@ -49,13 +48,13 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Preferences</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      <div className="border-b bg-muted/40 px-6 py-5">
+        <p className="text-base font-semibold">Preferences</p>
+      </div>
+      <div className="flex flex-col gap-5 px-6 pt-5 pb-6">
         <div className="flex flex-col gap-1.5">
-          <Label>Weight Units</Label>
+          <Label className="text-sm font-medium">Weight Units</Label>
           <Select value={units} onValueChange={setUnits}>
             <SelectTrigger>
               <SelectValue />
@@ -71,7 +70,7 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label>Theme</Label>
+          <Label className="text-sm font-medium">Theme</Label>
           <Select value={theme} onValueChange={handleThemeChange}>
             <SelectTrigger>
               <SelectValue />
@@ -93,10 +92,12 @@ export default function ProfileForm({ profile }: { profile: UserProfile }) {
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
           {saved && !isDirty && (
-            <p className="text-sm text-muted-foreground">Saved</p>
+            <span className="inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-600 dark:text-green-400">
+              Saved
+            </span>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

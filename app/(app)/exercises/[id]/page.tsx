@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import ExerciseProgressChart from "@/app/components/Exercises/ExerciseProgressChart/ExerciseProgressChart";
 
 async function ExerciseHistoryContent({
   params,
@@ -29,18 +30,38 @@ async function ExerciseHistoryContent({
     ? Math.round(prSet.weight * (36 / (37 - prSet.reps)))
     : null;
 
+  const chartData = history
+    .filter((e) => e.workout?.completed_at && e.sets.length > 0)
+    .map((e) => {
+      const bestWeight = Math.max(...e.sets.map((s) => s.weight));
+      return {
+        date: new Date(e.workout!.completed_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        weight: toDisplayWeight(bestWeight, preferredUnits),
+      };
+    })
+    .reverse();
+
   return (
     <>
       <div className="mb-4">
         <h1 className="text-2xl font-bold">{exercise.name}</h1>
         {exercise.muscle_group && (
-          <p className="mt-1 text-sm capitalize text-muted-foreground">{exercise.muscle_group}</p>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium capitalize text-primary">
+              {exercise.muscle_group}
+            </span>
+            {exercise.equipment && (
+              <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium capitalize text-muted-foreground">
+                {exercise.equipment}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
       {prSet !== null && (
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-xl border bg-card p-4 shadow-sm">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Weight PR</p>
             <div className="mt-1 flex items-baseline gap-2">
               <p className="text-3xl font-bold">
@@ -51,7 +72,7 @@ async function ExerciseHistoryContent({
             </div>
           </div>
           {estimated1RM !== null && (
-            <div className="rounded-xl border bg-card p-4">
+            <div className="rounded-xl border bg-card p-4 shadow-sm">
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Est. 1RM</p>
               <p className="mt-1 text-3xl font-bold">
                 {toDisplayWeight(estimated1RM, preferredUnits)}
@@ -63,9 +84,15 @@ async function ExerciseHistoryContent({
         </div>
       )}
 
+      {chartData.length > 1 && (
+        <div className="mb-6">
+          <ExerciseProgressChart data={chartData} units={preferredUnits} />
+        </div>
+      )}
+
       {history.length === 0 ? (
-        <div className="rounded-xl border bg-card p-8 text-center">
-          <p className="font-medium">No history yet</p>
+        <div className="rounded-xl border bg-card p-8 text-center shadow-sm">
+          <p className="font-semibold">No history yet</p>
           <p className="mt-1 text-sm text-muted-foreground">
             This exercise will appear here once you log it in a workout.
           </p>
@@ -85,31 +112,24 @@ async function ExerciseHistoryContent({
             const totalVolume = entry.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
 
             return (
-              <div key={entry.workoutExerciseId} className="rounded-xl border bg-card p-4">
+              <div key={entry.workoutExerciseId} className="rounded-xl border bg-card p-4 shadow-sm">
                 <div className="mb-3 flex items-start justify-between">
                   <div>
-                    <p className="font-medium">{entry.workout?.name ?? "Workout"}</p>
-                    {date && <p className="text-xs text-muted-foreground">{date}</p>}
+                    <p className="font-semibold">{entry.workout?.name ?? "Workout"}</p>
+                    {date && <p className="mt-0.5 text-xs text-muted-foreground">{date}</p>}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {toDisplayWeight(totalVolume, preferredUnits).toLocaleString()} {preferredUnits} total
+                  <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    {toDisplayWeight(totalVolume, preferredUnits).toLocaleString()} {preferredUnits}
                   </span>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <div className="grid grid-cols-[2rem_1fr_1fr] gap-2 px-1 text-xs font-medium text-muted-foreground">
-                    <span>Set</span>
-                    <span>Weight ({preferredUnits})</span>
-                    <span>Reps</span>
-                  </div>
+                <div className="flex flex-wrap gap-1.5">
                   {entry.sets.map((set, i) => (
-                    <div
+                    <span
                       key={set.id}
-                      className="grid grid-cols-[2rem_1fr_1fr] gap-2 rounded-lg bg-muted px-1 py-1.5 text-sm"
+                      className="inline-flex items-center rounded-full bg-background px-2.5 py-0.5 text-xs font-medium text-foreground/70 ring-1 ring-border"
                     >
-                      <span className="text-center text-muted-foreground">{i + 1}</span>
-                      <span>{toDisplayWeight(set.weight, preferredUnits)} {preferredUnits}</span>
-                      <span>{set.reps} reps</span>
-                    </div>
+                      {toDisplayWeight(set.weight, preferredUnits)}{preferredUnits} × {set.reps}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -128,6 +148,7 @@ function ExerciseHistorySkeleton() {
         <Skeleton className="h-24 rounded-xl" />
         <Skeleton className="h-24 rounded-xl" />
       </div>
+      <Skeleton className="h-48 rounded-xl" />
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="rounded-xl border bg-card p-4">
           <div className="mb-3 flex justify-between">

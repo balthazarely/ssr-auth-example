@@ -96,12 +96,19 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
   return (
     <>
       <div className="rounded-xl border bg-card p-5 shadow-sm">
-        <div className="mb-3 flex items-start justify-between">
+        <div className="mb-4 flex items-start justify-between">
           <div>
-            <p className="font-semibold text-card-foreground">{workout.name}</p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <p className="text-base font-semibold text-card-foreground">{workout.name}</p>
+            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
               <span>{date}</span>
-              {duration && <><span>·</span><span>{duration}</span></>}
+              {duration && (
+                <>
+                  <span>·</span>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    {duration}
+                  </span>
+                </>
+              )}
             </div>
           </div>
           <DropdownMenu>
@@ -124,21 +131,18 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
           </DropdownMenu>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {workout.workout_exercises.map((ex) => (
-            <div key={ex.id} className="rounded-lg bg-muted px-3 py-2">
-              <p className="text-sm font-medium">{ex.exercise_name}</p>
-              <div className="mt-1 flex flex-col gap-0.5">
+            <div key={ex.id} className="rounded-lg border border-border/50 bg-muted/50 px-3 py-2.5">
+              <p className="text-sm font-semibold">{ex.exercise_name}</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {ex.workout_sets.map((s, i) => (
-                  <div
+                  <span
                     key={s.id}
-                    className="flex items-center gap-2 text-xs text-muted-foreground"
+                    className="inline-flex items-center rounded-full bg-background px-2.5 py-0.5 text-xs font-medium text-foreground/70 ring-1 ring-border"
                   >
-                    <span className="w-12">Set {i + 1}</span>
-                    <span>{toDisplayWeight(s.weight, preferredUnits)} {preferredUnits}</span>
-                    <span>·</span>
-                    <span>{s.reps} reps</span>
-                  </div>
+                    {toDisplayWeight(s.weight, preferredUnits)}{preferredUnits} × {s.reps}
+                  </span>
                 ))}
               </div>
             </div>

@@ -16,7 +16,7 @@ export default function UserCard({ user }: { user: User }) {
     <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-4 border-b bg-muted/40 px-6 py-5">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground ring-2 ring-primary/20">
           {initials}
         </div>
         <div className="min-w-0">
