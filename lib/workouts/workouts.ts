@@ -44,6 +44,28 @@ export async function getWorkoutHistory(page = 0) {
   };
 }
 
+export async function getLastExerciseSets(
+  exerciseId: string,
+): Promise<{ weight: number; reps: number }[]> {
+  const supabase = await createSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("workout_exercises")
+    .select("workout_sets ( weight, reps, order_index )")
+    .eq("exercise_id", exerciseId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) return [];
+
+  return (
+    data.workout_sets as { weight: number; reps: number; order_index: number }[]
+  )
+    .sort((a, b) => a.order_index - b.order_index)
+    .map(({ weight, reps }) => ({ weight, reps }));
+}
+
 export type ExerciseHistoryEntry = {
   workoutExerciseId: string;
   exerciseName: string;

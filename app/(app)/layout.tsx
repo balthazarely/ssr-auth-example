@@ -1,5 +1,5 @@
-import Navbar from "@/app/components/DesktopNav/DesktopNav";
-import MobileNav from "@/app/components/MobileNav/MobileNav";
+import Navbar from "@/app/components/Nav/DesktopNav";
+import MobileNav from "@/app/components/Nav/MobileNav";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

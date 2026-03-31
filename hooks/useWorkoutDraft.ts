@@ -26,11 +26,22 @@ export function isWorkoutInProgress(userId?: string): boolean {
   return !!loadDraft(userId)?.startedAt;
 }
 
-export function markWorkoutStarted(userId?: string): void {
+export function markWorkoutStarted(
+  userId?: string,
+  initialBlocks?: ActiveExerciseBlock[],
+  initialName?: string,
+): void {
   try {
     const key = draftKey(userId);
     const existing = loadDraft(userId) ?? { blocks: [], workoutName: "", startedAt: null };
-    localStorage.setItem(key, JSON.stringify({ ...existing, startedAt: Date.now() }));
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        blocks: initialBlocks ?? existing.blocks,
+        workoutName: initialName ?? existing.workoutName,
+        startedAt: Date.now(),
+      }),
+    );
   } catch {}
 }
 

@@ -4,6 +4,13 @@ import { createSupabaseClient } from "@/lib/supabase/server";
 import { ActiveExerciseBlock } from "@/types";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getLastExerciseSets } from "@/lib/workouts/workouts";
+
+export async function getLastExerciseSetsAction(
+  exerciseId: string,
+): Promise<{ weight: number; reps: number }[]> {
+  return getLastExerciseSets(exerciseId);
+}
 
 export async function saveWorkoutAction(
   blocks: ActiveExerciseBlock[],

@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ActiveExerciseSets, ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
-import { saveWorkoutAction, updateWorkoutAction } from "@/actions/workouts";
+import { saveWorkoutAction, updateWorkoutAction, getLastExerciseSetsAction } from "@/actions/workouts";
 import { WeightUnit, toStoredLbs } from "@/lib/units";
 
 interface Props {
@@ -38,6 +38,7 @@ interface Props {
   userId?: string;
   preferredUnits?: WeightUnit;
   onSaveSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export default function NewWorkout({
@@ -48,6 +49,7 @@ export default function NewWorkout({
   userId,
   preferredUnits = "lbs",
   onSaveSuccess,
+  onCancel,
 }: Props) {
   const isEditing = !!workoutId;
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -110,15 +112,21 @@ export default function NewWorkout({
 
   // --- dialog ---
 
-  const handleSelectExercise = (selected: Exercise[]) => {
-    setBlocks((prev) => [
-      ...prev,
-      ...selected.map((exercise) => ({
-        exerciseId: exercise.id,
-        excerciseName: exercise.name,
-        sets: [{ weight: 0, reps: 0, isCompleted: false }],
-      })),
-    ]);
+  const handleSelectExercise = async (selected: Exercise[]) => {
+    const blocksWithHistory = await Promise.all(
+      selected.map(async (exercise) => {
+        const lastSets = await getLastExerciseSetsAction(exercise.id);
+        return {
+          exerciseId: exercise.id,
+          excerciseName: exercise.name,
+          sets:
+            lastSets.length > 0
+              ? lastSets.map((s) => ({ ...s, isCompleted: false }))
+              : [{ weight: 0, reps: 0, isCompleted: false }],
+        };
+      }),
+    );
+    setBlocks((prev) => [...prev, ...blocksWithHistory]);
     setDialogOpen(false);
   };
 
@@ -215,7 +223,7 @@ export default function NewWorkout({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Going</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { clearDraft(); router.push("/history"); }}>
+            <AlertDialogAction onClick={() => { clearDraft(); onCancel ? onCancel() : router.push("/history"); }}>
               Cancel Workout
             </AlertDialogAction>
           </AlertDialogFooter>
