@@ -14,15 +14,21 @@ interface Props {
 export default function ExerciseList({ exercises, userId }: Props) {
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [activeEquipment, setActiveEquipment] = useState<string | null>(null);
 
   const muscleGroups = Array.from(
     new Set(exercises.map((e) => e.muscle_group).filter(Boolean))
   ).sort() as string[];
 
+  const equipmentTypes = Array.from(
+    new Set(exercises.map((e) => e.equipment).filter(Boolean))
+  ).sort() as string[];
+
   const filtered = exercises.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
     const matchesGroup = activeGroup ? e.muscle_group === activeGroup : true;
-    return matchesSearch && matchesGroup;
+    const matchesEquipment = activeEquipment ? e.equipment === activeEquipment : true;
+    return matchesSearch && matchesGroup && matchesEquipment;
   });
 
   const grouped = filtered.reduce(
@@ -45,30 +51,57 @@ export default function ExerciseList({ exercises, userId }: Props) {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <button
-          onClick={() => setActiveGroup(null)}
-          className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-            activeGroup === null
-              ? "border-primary bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-accent"
-          }`}
-        >
-          All
-        </button>
-        {muscleGroups.map((group) => (
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           <button
-            key={group}
-            onClick={() => setActiveGroup(activeGroup === group ? null : group)}
-            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
-              activeGroup === group
+            onClick={() => setActiveGroup(null)}
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              activeGroup === null
                 ? "border-primary bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-accent"
             }`}
           >
-            {group}
+            All
           </button>
-        ))}
+          {muscleGroups.map((group) => (
+            <button
+              key={group}
+              onClick={() => setActiveGroup(activeGroup === group ? null : group)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
+                activeGroup === group
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {group}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setActiveEquipment(null)}
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              activeEquipment === null
+                ? "border-primary bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            All
+          </button>
+          {equipmentTypes.map((eq) => (
+            <button
+              key={eq}
+              onClick={() => setActiveEquipment(activeEquipment === eq ? null : eq)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
+                activeEquipment === eq
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {eq}
+            </button>
+          ))}
+        </div>
       </div>
 
       {sortedGroups.length === 0 && (
