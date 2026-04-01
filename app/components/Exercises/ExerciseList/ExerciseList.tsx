@@ -121,7 +121,7 @@ export default function ExerciseList({ exercises, userId }: Props) {
               {grouped[group].map((ex, i) => (
                 <div
                   key={ex.id}
-                  className={`flex items-center justify-between px-4 py-3.5 ${
+                  className={`flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-accent ${
                     i !== grouped[group].length - 1 ? "border-b" : ""
                   }`}
                 >

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 const navLinks = [
@@ -40,14 +39,8 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 hidden border-b bg-background px-6 py-3 sm:block">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/home">
-          <Image
-            src="/lift-logo.png"
-            alt="App logo"
-            width={48}
-            height={48}
-            className="h-16 w-auto"
-          />
+        <Link href="/home" className="text-xl font-bold tracking-tight">
+          🏋️ lifts
         </Link>
         <NavLinks />
       </div>

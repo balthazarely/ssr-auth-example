@@ -3,7 +3,7 @@ dotenv.config({ path: ".env.local" });
 
 import { createClient } from "@supabase/supabase-js";
 
-const USER_ID = "ce1dff72-eb17-4839-86c9-d96a17b32538";
+const USER_ID = "ae5c7ab5-65b4-4c34-8ca4-03973f7068c7";
 const MONTHS = 6;
 
 const supabase = createClient(
@@ -19,7 +19,10 @@ const WORKOUT_PLANS: {
 }[] = [
   { name: "Push Day", muscleGroups: ["chest", "shoulders", "triceps"] },
   { name: "Pull Day", muscleGroups: ["back", "biceps"] },
-  { name: "Leg Day", muscleGroups: ["quads", "hamstrings", "glutes", "calves"] },
+  {
+    name: "Leg Day",
+    muscleGroups: ["quads", "hamstrings", "glutes", "calves"],
+  },
   { name: "Upper A", muscleGroups: ["chest", "back", "shoulders"] },
   { name: "Upper B", muscleGroups: ["chest", "back", "biceps", "triceps"] },
   { name: "Lower", muscleGroups: ["quads", "hamstrings", "glutes"] },
@@ -28,8 +31,8 @@ const WORKOUT_PLANS: {
 // Week schedules: indices into WORKOUT_PLANS, null = rest day
 // Alternates between PPL and Upper/Lower to feel realistic
 const WEEK_SCHEDULES = [
-  [0, null, 1, null, 2, null, null],        // PPL week
-  [3, null, 4, null, 5, null, null],        // Upper/Lower week
+  [0, null, 1, null, 2, null, null], // PPL week
+  [3, null, 4, null, 5, null, null], // Upper/Lower week
   [0, null, 1, null, 2, null, null],
   [3, null, 4, null, 5, null, null],
 ];
@@ -40,7 +43,6 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-
 function roundToNearest(val: number, nearest = 2.5): number {
   return Math.round(val / nearest) * nearest;
 }
@@ -50,8 +52,8 @@ function roundToNearest(val: number, nearest = 2.5): number {
 // - Each 4-week cycle yields ~5% net strength gain
 // - Session-level variance: bad days, normal days, great days
 function progressedWeight(baseWeight: number, weekIndex: number): number {
-  const cycle = Math.floor(weekIndex / 4);       // which 4-week block we're in
-  const weekInCycle = weekIndex % 4;             // 0, 1, 2 = working; 3 = deload
+  const cycle = Math.floor(weekIndex / 4); // which 4-week block we're in
+  const weekInCycle = weekIndex % 4; // 0, 1, 2 = working; 3 = deload
 
   const isDeload = weekInCycle === 3;
 
@@ -61,7 +63,7 @@ function progressedWeight(baseWeight: number, weekIndex: number): number {
   let weekFactor: number;
   if (isDeload) {
     // Deload: intentional drop back to ~90% of this cycle's peak
-    weekFactor = cycleFactor * 0.90;
+    weekFactor = cycleFactor * 0.9;
   } else {
     // Working weeks ramp up 0–4% across the 3 weeks
     weekFactor = cycleFactor * (1 + weekInCycle * 0.02);
@@ -73,7 +75,7 @@ function progressedWeight(baseWeight: number, weekIndex: number): number {
   if (roll < 0.12) {
     // Bad day (12% chance): fatigue, poor sleep, etc.
     sessionFactor = 0.93 + Math.random() * 0.04;
-  } else if (roll < 0.20) {
+  } else if (roll < 0.2) {
     // Great day (8% chance): feeling strong, hit a small PR
     sessionFactor = 1.02 + Math.random() * 0.03;
   } else {
@@ -87,15 +89,15 @@ function progressedWeight(baseWeight: number, weekIndex: number): number {
 // ── Base weights per muscle group (lbs) ─────────────────────────────────────
 
 const BASE_WEIGHTS: Record<string, [number, number]> = {
-  chest:      [135, 185],
-  back:       [115, 155],
-  shoulders:  [35,  55],
-  triceps:    [30,  50],
-  biceps:     [30,  50],
-  quads:      [155, 225],
+  chest: [135, 185],
+  back: [115, 155],
+  shoulders: [35, 55],
+  triceps: [30, 50],
+  biceps: [30, 50],
+  quads: [155, 225],
   hamstrings: [115, 155],
-  glutes:     [95,  135],
-  calves:     [45,  65],
+  glutes: [95, 135],
+  calves: [45, 65],
 };
 
 function baseWeightFor(muscleGroup: string): number {
@@ -109,15 +111,17 @@ type RepScheme = { sets: number; reps: number };
 
 function repSchemeForWeek(weekIndex: number): RepScheme {
   const cycle = weekIndex % 3;
-  if (cycle === 0) return { sets: 5, reps: pick([3, 4, 5]) };       // strength
-  if (cycle === 1) return { sets: 4, reps: pick([6, 7, 8]) };       // moderate
-  return        { sets: 3, reps: pick([10, 12, 15]) };              // volume
+  if (cycle === 0) return { sets: 5, reps: pick([3, 4, 5]) }; // strength
+  if (cycle === 1) return { sets: 4, reps: pick([6, 7, 8]) }; // moderate
+  return { sets: 3, reps: pick([10, 12, 15]) }; // volume
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(`Seeding ${MONTHS} months of workout history for user ${USER_ID}...`);
+  console.log(
+    `Seeding ${MONTHS} months of workout history for user ${USER_ID}...`,
+  );
 
   // 1. Fetch all exercises from DB
   const { data: exercises, error: exErr } = await supabase
@@ -125,7 +129,10 @@ async function main() {
     .select("id, name, muscle_group");
 
   if (exErr || !exercises?.length) {
-    console.error("Failed to fetch exercises. Have you run seed-exercises.ts first?", exErr);
+    console.error(
+      "Failed to fetch exercises. Have you run seed-exercises.ts first?",
+      exErr,
+    );
     process.exit(1);
   }
 
@@ -165,7 +172,8 @@ async function main() {
   // Align to Monday
   startDate.setDate(startDate.getDate() - ((startDate.getDay() + 6) % 7));
 
-  const workoutDays: { date: Date; planIndex: number; weekIndex: number }[] = [];
+  const workoutDays: { date: Date; planIndex: number; weekIndex: number }[] =
+    [];
 
   let weekIndex = 0;
   const cursor = new Date(startDate);
@@ -198,7 +206,9 @@ async function main() {
     const completedAt = new Date(date);
     completedAt.setHours(pick([7, 8, 9, 17, 18, 19]), pick([0, 15, 30]), 0, 0);
     const durationMins = 45 + Math.floor(Math.random() * 46);
-    const startedAt = new Date(completedAt.getTime() - durationMins * 60 * 1000);
+    const startedAt = new Date(
+      completedAt.getTime() - durationMins * 60 * 1000,
+    );
 
     // Insert workout
     const { data: workout, error: wErr } = await supabase
@@ -218,9 +228,12 @@ async function main() {
     }
 
     // Pick 3-5 exercises from the plan's muscle groups
-    const availableMuscles = plan.muscleGroups.filter((mg) => byMuscle[mg]?.length);
+    const availableMuscles = plan.muscleGroups.filter(
+      (mg) => byMuscle[mg]?.length,
+    );
     const numExercises = 3 + Math.floor(Math.random() * 3); // 3-5
-    const chosenExercises: { id: string; name: string; muscleGroup: string }[] = [];
+    const chosenExercises: { id: string; name: string; muscleGroup: string }[] =
+      [];
 
     for (let i = 0; i < numExercises && availableMuscles.length > 0; i++) {
       const mg = availableMuscles[i % availableMuscles.length];
@@ -231,7 +244,8 @@ async function main() {
     // Insert workout_exercises
     for (let exIdx = 0; exIdx < chosenExercises.length; exIdx++) {
       const ex = chosenExercises[exIdx];
-      const baseWeight = exerciseBaseWeight[ex.id] ?? baseWeightFor(ex.muscleGroup);
+      const baseWeight =
+        exerciseBaseWeight[ex.id] ?? baseWeightFor(ex.muscleGroup);
       const weight = progressedWeight(baseWeight, wk);
 
       const { data: we, error: weErr } = await supabase
@@ -264,7 +278,8 @@ async function main() {
     }
 
     inserted++;
-    if (inserted % 10 === 0) console.log(`  ${inserted}/${workoutDays.length} workouts inserted...`);
+    if (inserted % 10 === 0)
+      console.log(`  ${inserted}/${workoutDays.length} workouts inserted...`);
   }
 
   console.log(`\nDone! Inserted ${inserted} workouts across ${MONTHS} months.`);

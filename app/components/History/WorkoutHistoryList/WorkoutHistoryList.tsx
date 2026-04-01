@@ -21,11 +21,9 @@ export default async function WorkoutHistoryList({
   const { page: pageParam } = await searchParams;
   const page = Math.max(0, Number(pageParam ?? 0));
 
-  const [{ data: history, totalPages }, exercises, profile] = await Promise.all([
-    getWorkoutHistory(page),
-    getAllExercises(),
-    getUserProfile(),
-  ]);
+  const [{ data: history, totalPages }, exercises, profile] = await Promise.all(
+    [getWorkoutHistory(page), getAllExercises(), getUserProfile()],
+  );
 
   const preferredUnits = (profile?.preferred_units ?? "lbs") as WeightUnit;
 
@@ -77,7 +75,9 @@ export default async function WorkoutHistoryList({
               <PaginationNext
                 href={`/history?page=${page + 1}`}
                 aria-disabled={page >= totalPages - 1}
-                className={page >= totalPages - 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  page >= totalPages - 1 ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>

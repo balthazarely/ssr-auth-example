@@ -84,14 +84,16 @@ export async function updateWorkoutAction(
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  // 1. update workout name
-  const { error: workoutError } = await supabase
+  // 1. update workout name — select back the id to confirm ownership
+  const { data: owned, error: workoutError } = await supabase
     .from("workouts")
     .update({ name: name ?? "Workout" })
     .eq("id", workoutId)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select("id");
 
   if (workoutError) throw workoutError;
+  if (!owned?.length) throw new Error("Not found or unauthorized");
 
   // 2. delete existing exercises (sets cascade via FK)
   const { error: deleteError } = await supabase
