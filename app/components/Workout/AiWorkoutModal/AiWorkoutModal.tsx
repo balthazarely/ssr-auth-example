@@ -1,18 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Loader2 } from "lucide-react";
 import { generateWorkoutAction, GeneratedWorkout } from "@/actions/ai";
 import { Exercise } from "@/types/excercises";
-import { WeightUnit } from "@/lib/units";
+import { WeightUnit } from "@/lib/utils/units";
 import { ActiveExerciseBlock } from "@/types";
 
 const SUGGESTIONS = [
@@ -32,13 +27,7 @@ interface Props {
   onGenerated: (name: string, blocks: ActiveExerciseBlock[]) => void;
 }
 
-export default function AiWorkoutModal({
-  open,
-  onOpenChange,
-  exercises,
-  preferredUnits,
-  onGenerated,
-}: Props) {
+export default function AiWorkoutModal({ open, onOpenChange, exercises, preferredUnits, onGenerated }: Props) {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -116,11 +105,7 @@ export default function AiWorkoutModal({
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <Button
-            onClick={handleGenerate}
-            disabled={!prompt.trim() || isPending}
-            className="w-full"
-          >
+          <Button onClick={handleGenerate} disabled={!prompt.trim() || isPending} className="w-full">
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

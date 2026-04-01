@@ -1,15 +1,25 @@
 "use client";
 
 import { logoutAction } from "@/actions/users";
-import { startTransition } from "react";
+import { useTransition } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function LogoutButton() {
+  const [isPending, startTransition] = useTransition();
+
   return (
-    <button
-      onClick={() => startTransition(async () => { await logoutAction(); })}
-      className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
+    <Button
+      type="button"
+      variant="destructive"
+      size="lg"
+      disabled={isPending}
+      onClick={() =>
+        startTransition(async () => {
+          await logoutAction();
+        })
+      }
     >
-      Sign out
-    </button>
+      {isPending ? "Signing out..." : "Sign out"}
+    </Button>
   );
 }

@@ -3,12 +3,7 @@
 import { startTransition, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +18,7 @@ import EditWorkoutDialog from "@/app/components/History/EditWorkoutDialog/EditWo
 import { deleteWorkoutAction } from "@/actions/workouts";
 import { ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
-import { WeightUnit, toDisplayWeight } from "@/lib/units";
+import { WeightUnit, toDisplayWeight } from "@/lib/utils/units";
 
 interface WorkoutSet {
   id: string;
@@ -81,17 +76,15 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
     return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
   })();
 
-  const initialBlocks: ActiveExerciseBlock[] = workout.workout_exercises.map(
-    (ex) => ({
-      exerciseId: ex.exercise_id,
-      excerciseName: ex.exercise_name,
-      sets: ex.workout_sets.map((s) => ({
-        weight: s.weight,
-        reps: s.reps,
-        isCompleted: s.is_completed,
-      })),
-    }),
-  );
+  const initialBlocks: ActiveExerciseBlock[] = workout.workout_exercises.map((ex) => ({
+    exerciseId: ex.exercise_id,
+    excerciseName: ex.exercise_name,
+    sets: ex.workout_sets.map((s) => ({
+      weight: s.weight,
+      reps: s.reps,
+      isCompleted: s.is_completed,
+    })),
+  }));
 
   return (
     <>
@@ -118,13 +111,8 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => setDeleteOpen(true)}
-              >
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteOpen(true)}>
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -141,7 +129,8 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
                     key={s.id}
                     className="inline-flex items-center rounded-full bg-background px-2.5 py-0.5 text-xs font-medium text-foreground/70 ring-1 ring-border"
                   >
-                    {toDisplayWeight(s.weight, preferredUnits)}{preferredUnits} × {s.reps}
+                    {toDisplayWeight(s.weight, preferredUnits)}
+                    {preferredUnits} × {s.reps}
                   </span>
                 ))}
               </div>
@@ -155,8 +144,7 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
           <AlertDialogHeader>
             <AlertDialogTitle>Delete workout?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete <strong>{workout.name}</strong>. This
-              action cannot be undone.
+              This will permanently delete <strong>{workout.name}</strong>. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

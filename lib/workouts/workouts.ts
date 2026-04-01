@@ -1,52 +1,66 @@
 import { createSupabaseClient } from "@/lib/supabase/server";
 
-const PAGE_SIZE = 5;
+function formatMonth(date: Date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
 
-export async function getWorkoutHistory(page = 0) {
+export function getCurrentMonth() {
+  return formatMonth(new Date());
+}
+
+export function isValidMonth(value: string) {
+  return /^\d{4}-\d{2}$/.test(value);
+}
+
+function getMonthRange(month: string) {
+  const [yearPart, monthPart] = month.split("-");
+  const year = Number(yearPart);
+  const monthIndex = Number(monthPart) - 1;
+  const from = new Date(Date.UTC(year, monthIndex, 1)).toISOString();
+  const to = new Date(Date.UTC(year, monthIndex + 1, 1)).toISOString();
+  return { from, to };
+}
+
+export async function getWorkoutHistory(month: string) {
   const supabase = await createSupabaseClient();
-  const from = page * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
+  const { from, to } = getMonthRange(month);
 
-  const [{ count }, { data, error }] = await Promise.all([
-    supabase.from("workouts").select("*", { count: "exact", head: true }),
-    supabase
-      .from("workouts")
-      .select(
-        `
+  const { data, error } = await supabase
+    .from("workouts")
+    .select(
+      `
+        id,
+        name,
+        started_at,
+        completed_at,
+        workout_exercises (
           id,
-          name,
-          started_at,
-          completed_at,
-          workout_exercises (
+          exercise_id,
+          exercise_name,
+          order_index,
+          workout_sets (
             id,
-            exercise_id,
-            exercise_name,
-            order_index,
-            workout_sets (
-              id,
-              weight,
-              reps,
-              is_completed,
-              order_index
-            )
+            weight,
+            reps,
+            is_completed,
+            order_index
           )
-        `,
-      )
-      .order("completed_at", { ascending: false })
-      .range(from, to),
-  ]);
+        )
+      `,
+    )
+    .gte("completed_at", from)
+    .lt("completed_at", to)
+    .order("completed_at", { ascending: false });
 
   if (error) throw error;
   return {
     data: data ?? [],
-    total: count ?? 0,
-    totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
   };
 }
 
-export async function getLastExerciseSets(
-  exerciseId: string,
-): Promise<{ weight: number; reps: number }[]> {
+export async function getLastExerciseSets(exerciseId: string): Promise<{ weight: number; reps: number }[]> {
   const supabase = await createSupabaseClient();
 
   const { data, error } = await supabase
@@ -59,9 +73,7 @@ export async function getLastExerciseSets(
 
   if (error) return [];
 
-  return (
-    data.workout_sets as { weight: number; reps: number; order_index: number }[]
-  )
+  return (data.workout_sets as { weight: number; reps: number; order_index: number }[])
     .sort((a, b) => a.order_index - b.order_index)
     .map(({ weight, reps }) => ({ weight, reps }));
 }
@@ -82,19 +94,17 @@ export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHi
   const supabase = await createSupabaseClient();
 
   const [{ data: exerciseData }, { data, error }] = await Promise.all([
-    supabase
-      .from("exercises")
-      .select("id, name, muscle_group, equipment")
-      .eq("id", exerciseId)
-      .single(),
+    supabase.from("exercises").select("id, name, muscle_group, equipment").eq("id", exerciseId).single(),
     supabase
       .from("workout_exercises")
-      .select(`
+      .select(
+        `
         id,
         exercise_name,
         workouts ( id, name, completed_at ),
         workout_sets ( id, weight, reps, order_index )
-      `)
+      `,
+      )
       .eq("exercise_id", exerciseId)
       .order("created_at", { ascending: false }),
   ]);
@@ -107,8 +117,9 @@ export async function getExerciseHistory(exerciseId: string): Promise<ExerciseHi
       workoutExerciseId: row.id,
       exerciseName: row.exercise_name,
       workout: (row.workouts as unknown as { id: string; name: string; completed_at: string }) ?? null,
-      sets: (row.workout_sets as { id: string; weight: number; reps: number; order_index: number }[])
-        .sort((a, b) => a.order_index - b.order_index),
+      sets: (row.workout_sets as { id: string; weight: number; reps: number; order_index: number }[]).sort(
+        (a, b) => a.order_index - b.order_index,
+      ),
     })),
   };
 }

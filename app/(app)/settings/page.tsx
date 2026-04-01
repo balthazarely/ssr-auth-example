@@ -38,17 +38,38 @@ function SettingsSkeleton() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4 px-6 py-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
+        <div className="px-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between border-t py-3.5 first:border-t-0">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+          ))}
         </div>
       </div>
-      <div className="rounded-xl border p-6">
-        <Skeleton className="mb-4 h-5 w-24" />
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-9 w-full rounded-md" />
-          <Skeleton className="h-9 w-full rounded-md" />
+
+      <div className="overflow-hidden rounded-xl border">
+        <div className="border-b bg-muted/40 px-6 py-5">
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <div className="flex flex-col gap-5 px-6 pt-5 pb-6">
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-4 w-14" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+          <Skeleton className="h-9 w-24 rounded-md" />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="border-b bg-muted/40 px-6 py-5">
+          <Skeleton className="h-5 w-16" />
+        </div>
+        <div className="px-6 py-5">
           <Skeleton className="h-9 w-24 rounded-md" />
         </div>
       </div>

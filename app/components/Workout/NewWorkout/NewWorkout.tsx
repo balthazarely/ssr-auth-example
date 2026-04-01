@@ -8,12 +8,7 @@ import WorkoutTimer from "../WorkoutTimer/WorkoutTimer";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import {
   AlertDialog,
@@ -28,7 +23,7 @@ import {
 import { ActiveExerciseSets, ActiveExerciseBlock } from "@/types";
 import { Exercise } from "@/types/excercises";
 import { saveWorkoutAction, updateWorkoutAction, getLastExerciseSetsAction } from "@/actions/workouts";
-import { WeightUnit, toStoredLbs } from "@/lib/units";
+import { WeightUnit, toStoredLbs } from "@/lib/utils/units";
 
 interface Props {
   exercises: Exercise[];
@@ -57,25 +52,22 @@ export default function NewWorkout({
   const [isSaving, startTransition] = useTransition();
   const router = useRouter();
 
-  const { blocks, setBlocks, workoutName, setWorkoutName, startedAt, clearDraft } =
-    useWorkoutDraft(!isEditing, initialBlocks, initialName, userId);
+  const { blocks, setBlocks, workoutName, setWorkoutName, startedAt, clearDraft } = useWorkoutDraft(
+    !isEditing,
+    initialBlocks,
+    initialName,
+    userId,
+  );
 
   // --- block helpers ---
-  const updateBlock = (
-    blockIndex: number,
-    updater: (block: ActiveExerciseBlock) => ActiveExerciseBlock,
-  ) => {
-    setBlocks((prev) =>
-      prev.map((block, i) => (i === blockIndex ? updater(block) : block)),
-    );
+  const updateBlock = (blockIndex: number, updater: (block: ActiveExerciseBlock) => ActiveExerciseBlock) => {
+    setBlocks((prev) => prev.map((block, i) => (i === blockIndex ? updater(block) : block)));
   };
 
   const handleAddSet = (blockIndex: number) => {
     updateBlock(blockIndex, (block) => {
       const last = block.sets[block.sets.length - 1];
-      const newSet = last
-        ? { weight: last.weight, reps: last.reps, isCompleted: false }
-        : { weight: 0, reps: 0, isCompleted: false };
+      const newSet = last ? { weight: last.weight, reps: last.reps, isCompleted: false } : { weight: 0, reps: 0, isCompleted: false };
       return { ...block, sets: [...block.sets, newSet] };
     });
   };
@@ -87,12 +79,7 @@ export default function NewWorkout({
     }));
   };
 
-  const handleChangeSet = (
-    blockIndex: number,
-    setIndex: number,
-    field: keyof ActiveExerciseSets,
-    value: string | boolean,
-  ) => {
+  const handleChangeSet = (blockIndex: number, setIndex: number, field: keyof ActiveExerciseSets, value: string | boolean) => {
     updateBlock(blockIndex, (block) => ({
       ...block,
       sets: block.sets.map((set, j) =>
@@ -119,10 +106,7 @@ export default function NewWorkout({
         return {
           exerciseId: exercise.id,
           excerciseName: exercise.name,
-          sets:
-            lastSets.length > 0
-              ? lastSets.map((s) => ({ ...s, isCompleted: false }))
-              : [{ weight: 0, reps: 0, isCompleted: false }],
+          sets: lastSets.length > 0 ? lastSets.map((s) => ({ ...s, isCompleted: false })) : [{ weight: 0, reps: 0, isCompleted: false }],
         };
       }),
     );
@@ -170,10 +154,7 @@ export default function NewWorkout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setCancelOpen(true)}
-                >
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelOpen(true)}>
                   Cancel Workout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -190,9 +171,7 @@ export default function NewWorkout({
           workoutId={workoutId}
           excerciseName={block.excerciseName}
           preferredUnits={preferredUnits}
-          onChangeSet={(setIndex, field, value) =>
-            handleChangeSet(blockIndex, setIndex, field, value)
-          }
+          onChangeSet={(setIndex, field, value) => handleChangeSet(blockIndex, setIndex, field, value)}
           onAddSet={() => handleAddSet(blockIndex)}
           onDeleteSet={(setIndex) => handleDeleteSet(blockIndex, setIndex)}
           onRemove={() => handleRemoveBlock(blockIndex)}
@@ -206,24 +185,22 @@ export default function NewWorkout({
         {isSaving ? "Saving..." : "Save Workout"}
       </Button>
 
-      <AddExerciseDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        exercises={exercises}
-        onSelect={handleSelectExercise}
-      />
+      <AddExerciseDialog open={dialogOpen} onOpenChange={setDialogOpen} exercises={exercises} onSelect={handleSelectExercise} />
 
       <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel workout?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your progress will be lost. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Your progress will be lost. This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Going</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { clearDraft(); onCancel ? onCancel() : router.push("/history"); }}>
+            <AlertDialogAction
+              onClick={() => {
+                clearDraft();
+                onCancel ? onCancel() : router.push("/history");
+              }}
+            >
               Cancel Workout
             </AlertDialogAction>
           </AlertDialogFooter>

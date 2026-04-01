@@ -2,11 +2,7 @@ import { Suspense } from "react";
 import WorkoutHistoryList from "@/app/components/History/WorkoutHistoryList/WorkoutHistoryList";
 import WorkoutHistoryListSkeleton from "@/app/components/History/WorkoutHistoryList/WorkoutHistoryListSkeleton";
 
-export default function HistoryPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
+export default function HistoryPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   return (
     <div className="p-8">
       <div className="mx-auto max-w-xl">
