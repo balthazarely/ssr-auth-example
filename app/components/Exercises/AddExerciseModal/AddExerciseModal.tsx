@@ -4,43 +4,11 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { createExerciseAction } from "@/actions/exercises";
-
-const MUSCLE_GROUPS = [
-  "chest",
-  "back",
-  "shoulders",
-  "arms",
-  "legs",
-  "core",
-  "glutes",
-  "calves",
-  "full body",
-];
-
-const MOVEMENT_PATTERNS = [
-  "push",
-  "pull",
-  "hinge",
-  "squat",
-  "carry",
-  "rotation",
-];
+import { MUSCLE_GROUPS, MOVEMENT_PATTERNS } from "@/lib/exercises/constants";
 
 const defaultForm = {
   name: "",
@@ -82,7 +50,13 @@ export default function AddExerciseModal() {
         <Plus className="mr-2 h-4 w-4" /> Add Exercise
       </Button>
 
-      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(defaultForm); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(o) => {
+          setOpen(o);
+          if (!o) setForm(defaultForm);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Exercise</DialogTitle>
@@ -100,10 +74,7 @@ export default function AddExerciseModal() {
 
             <div className="flex flex-col gap-1.5">
               <Label>Muscle Group</Label>
-              <Select
-                value={form.muscle_group}
-                onValueChange={(v) => setForm((f) => ({ ...f, muscle_group: v }))}
-              >
+              <Select value={form.muscle_group} onValueChange={(v) => setForm((f) => ({ ...f, muscle_group: v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select muscle group" />
                 </SelectTrigger>
@@ -118,7 +89,9 @@ export default function AddExerciseModal() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Equipment <span className="text-muted-foreground">(optional)</span></Label>
+              <Label>
+                Equipment <span className="text-muted-foreground">(optional)</span>
+              </Label>
               <Input
                 placeholder="e.g. Barbell, Dumbbell, Cable"
                 value={form.equipment}
@@ -127,11 +100,10 @@ export default function AddExerciseModal() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Movement Pattern <span className="text-muted-foreground">(optional)</span></Label>
-              <Select
-                value={form.movement_pattern}
-                onValueChange={(v) => setForm((f) => ({ ...f, movement_pattern: v }))}
-              >
+              <Label>
+                Movement Pattern <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <Select value={form.movement_pattern} onValueChange={(v) => setForm((f) => ({ ...f, movement_pattern: v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select movement pattern" />
                 </SelectTrigger>
@@ -159,10 +131,7 @@ export default function AddExerciseModal() {
           </div>
 
           <DialogFooter>
-            <Button
-              onClick={handleSubmit}
-              disabled={!form.name.trim() || !form.muscle_group || isPending}
-            >
+            <Button onClick={handleSubmit} disabled={!form.name.trim() || !form.muscle_group || isPending}>
               {isPending ? "Saving..." : "Save Exercise"}
             </Button>
           </DialogFooter>

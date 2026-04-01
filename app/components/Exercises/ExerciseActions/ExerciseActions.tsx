@@ -4,20 +4,8 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,35 +16,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { updateExerciseAction, deleteExerciseAction } from "@/actions/exercises";
-
-const MUSCLE_GROUPS = [
-  "chest",
-  "back",
-  "shoulders",
-  "arms",
-  "legs",
-  "core",
-  "glutes",
-  "calves",
-  "full body",
-];
-
-const MOVEMENT_PATTERNS = [
-  "push",
-  "pull",
-  "hinge",
-  "squat",
-  "carry",
-  "rotation",
-];
+import { MUSCLE_GROUPS, MOVEMENT_PATTERNS } from "@/lib/exercises/constants";
 
 interface Exercise {
   id: string;
@@ -117,10 +80,7 @@ export default function ExerciseActions({ exercise }: { exercise: Exercise }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setEditOpen(true)}>Edit</DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setDeleteOpen(true)}
-            className="text-destructive focus:text-destructive"
-          >
+          <DropdownMenuItem onClick={() => setDeleteOpen(true)} className="text-destructive focus:text-destructive">
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -136,18 +96,12 @@ export default function ExerciseActions({ exercise }: { exercise: Exercise }) {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label>Name</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              />
+              <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label>Muscle Group</Label>
-              <Select
-                value={form.muscle_group}
-                onValueChange={(v) => setForm((f) => ({ ...f, muscle_group: v }))}
-              >
+              <Select value={form.muscle_group} onValueChange={(v) => setForm((f) => ({ ...f, muscle_group: v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select muscle group" />
                 </SelectTrigger>
@@ -165,20 +119,14 @@ export default function ExerciseActions({ exercise }: { exercise: Exercise }) {
               <Label>
                 Equipment <span className="text-muted-foreground">(optional)</span>
               </Label>
-              <Input
-                value={form.equipment}
-                onChange={(e) => setForm((f) => ({ ...f, equipment: e.target.value }))}
-              />
+              <Input value={form.equipment} onChange={(e) => setForm((f) => ({ ...f, equipment: e.target.value }))} />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label>
                 Movement Pattern <span className="text-muted-foreground">(optional)</span>
               </Label>
-              <Select
-                value={form.movement_pattern}
-                onValueChange={(v) => setForm((f) => ({ ...f, movement_pattern: v }))}
-              >
+              <Select value={form.movement_pattern} onValueChange={(v) => setForm((f) => ({ ...f, movement_pattern: v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select movement pattern" />
                 </SelectTrigger>
@@ -206,10 +154,7 @@ export default function ExerciseActions({ exercise }: { exercise: Exercise }) {
           </div>
 
           <DialogFooter>
-            <Button
-              onClick={handleEdit}
-              disabled={!form.name.trim() || !form.muscle_group || isPending}
-            >
+            <Button onClick={handleEdit} disabled={!form.name.trim() || !form.muscle_group || isPending}>
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -222,8 +167,8 @@ export default function ExerciseActions({ exercise }: { exercise: Exercise }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Exercise</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{exercise.name}&quot;? Any workout history
-              referencing this exercise will be updated to show &quot;Deleted Exercise&quot;.
+              Are you sure you want to delete &quot;{exercise.name}&quot;? Any workout history referencing this exercise will be updated to
+              show &quot;Deleted Exercise&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

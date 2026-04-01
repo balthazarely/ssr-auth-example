@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Exercises from "../Exercise/Exercise";
 import AddExerciseDialog from "../AddExerciseDialog/AddExerciseDialog";
 import WorkoutTimer from "../WorkoutTimer/WorkoutTimer";
+import PlateCalculatorDialog from "../PlateCalculatorDialog/PlateCalculatorDialog";
 import { useWorkoutDraft } from "@/hooks/useWorkoutDraft";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,6 +147,7 @@ export default function NewWorkout({
             onChange={(e) => setWorkoutName(e.target.value)}
             className="text-lg font-medium"
           />
+          <PlateCalculatorDialog preferredUnits={preferredUnits} />
           {!isEditing && startedAt && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
