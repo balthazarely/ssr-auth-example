@@ -11,6 +11,7 @@ export interface UserProfile {
 }
 
 export async function getUserProfile(): Promise<UserProfile | null> {
+  const startedAt = Date.now();
   const supabase = await createSupabaseClient();
 
   const {
@@ -25,5 +26,11 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     .single();
 
   if (error) throw error;
+  const durationMs = Date.now() - startedAt;
+  console.log("[history] getUserProfile", {
+    userId: user.id,
+    durationMs,
+  });
+
   return data;
 }

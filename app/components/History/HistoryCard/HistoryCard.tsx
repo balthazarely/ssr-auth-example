@@ -66,8 +66,6 @@ export default function HistoryCard({ workout, exercises, preferredUnits }: Prop
     day: "numeric",
   });
 
-  console.log(workout);
-
   const duration = (() => {
     if (!workout.started_at) return null;
     const ms = new Date(workout.completed_at).getTime() - new Date(workout.started_at).getTime();

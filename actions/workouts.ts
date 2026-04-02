@@ -3,20 +3,14 @@
 import { createSupabaseClient } from "@/lib/supabase/server";
 import { ActiveExerciseBlock } from "@/types";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getLastExerciseSets } from "@/lib/workouts/workouts";
 
-export async function getLastExerciseSetsAction(
-  exerciseId: string,
-): Promise<{ weight: number; reps: number }[]> {
+export async function getLastExerciseSetsAction(exerciseId: string): Promise<{ weight: number; reps: number }[]> {
   return getLastExerciseSets(exerciseId);
 }
 
-export async function saveWorkoutAction(
-  blocks: ActiveExerciseBlock[],
-  name?: string,
-  startedAt?: number,
-) {
+export async function saveWorkoutAction(blocks: ActiveExerciseBlock[], name?: string, startedAt?: number) {
   const supabase = await createSupabaseClient();
 
   const {
@@ -62,21 +56,16 @@ export async function saveWorkoutAction(
     })),
   );
 
-  const { error: setsError } = await supabase
-    .from("workout_sets")
-    .insert(allSets);
+  const { error: setsError } = await supabase.from("workout_sets").insert(allSets);
 
   if (setsError) throw setsError;
 
+  revalidateTag(`history:${user.id}`, "max");
   revalidatePath("/history");
   redirect("/history");
 }
 
-export async function updateWorkoutAction(
-  workoutId: string,
-  blocks: ActiveExerciseBlock[],
-  name?: string,
-) {
+export async function updateWorkoutAction(workoutId: string, blocks: ActiveExerciseBlock[], name?: string) {
   const supabase = await createSupabaseClient();
 
   const {
@@ -96,10 +85,7 @@ export async function updateWorkoutAction(
   if (!owned?.length) throw new Error("Not found or unauthorized");
 
   // 2. delete existing exercises (sets cascade via FK)
-  const { error: deleteError } = await supabase
-    .from("workout_exercises")
-    .delete()
-    .eq("workout_id", workoutId);
+  const { error: deleteError } = await supabase.from("workout_exercises").delete().eq("workout_id", workoutId);
 
   if (deleteError) throw deleteError;
 
@@ -128,12 +114,11 @@ export async function updateWorkoutAction(
     })),
   );
 
-  const { error: setsError } = await supabase
-    .from("workout_sets")
-    .insert(allSets);
+  const { error: setsError } = await supabase.from("workout_sets").insert(allSets);
 
   if (setsError) throw setsError;
 
+  revalidateTag(`history:${user.id}`, "max");
   revalidatePath("/history");
 }
 
@@ -145,13 +130,10 @@ export async function deleteWorkoutAction(workoutId: string) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase
-    .from("workouts")
-    .delete()
-    .eq("id", workoutId)
-    .eq("user_id", user.id);
+  const { error } = await supabase.from("workouts").delete().eq("id", workoutId).eq("user_id", user.id);
 
   if (error) throw error;
 
+  revalidateTag(`history:${user.id}`, "max");
   revalidatePath("/history");
 }

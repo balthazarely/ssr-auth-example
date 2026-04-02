@@ -1,4 +1,5 @@
 import { createSupabaseClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 
 function formatMonth(date: Date) {
   const year = date.getUTCFullYear();
@@ -25,12 +26,20 @@ function getMonthRange(month: string) {
 
 export async function getWorkoutHistory(month: string) {
   const supabase = await createSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { data: [] };
+
   const { from, to } = getMonthRange(month);
 
-  const { data, error } = await supabase
-    .from("workouts")
-    .select(
-      `
+  const getCachedWorkoutHistory = unstable_cache(
+    async () => {
+      const startedAt = Date.now();
+      const { data, error } = await supabase
+        .from("workouts")
+        .select(
+          `
         id,
         name,
         started_at,
@@ -49,14 +58,35 @@ export async function getWorkoutHistory(month: string) {
           )
         )
       `,
-    )
-    .gte("completed_at", from)
-    .lt("completed_at", to)
-    .order("completed_at", { ascending: false });
+        )
+        .eq("user_id", user.id)
+        .gte("completed_at", from)
+        .lt("completed_at", to)
+        .order("completed_at", { ascending: false });
 
-  if (error) throw error;
+      if (error) throw error;
+
+      const durationMs = Date.now() - startedAt;
+      console.log("[history] getWorkoutHistory cache-miss", {
+        userId: user.id,
+        month,
+        rows: data?.length ?? 0,
+        durationMs,
+      });
+
+      return data ?? [];
+    },
+    ["workout-history", user.id, month],
+    {
+      tags: [`history:${user.id}`],
+      revalidate: 300,
+    },
+  );
+
+  const data = await getCachedWorkoutHistory();
+
   return {
-    data: data ?? [],
+    data,
   };
 }
 

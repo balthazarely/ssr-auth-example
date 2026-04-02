@@ -3,6 +3,8 @@ import WorkoutHistoryList from "@/app/components/History/WorkoutHistoryList/Work
 import WorkoutHistoryListSkeleton from "@/app/components/History/WorkoutHistoryList/WorkoutHistoryListSkeleton";
 
 export default function HistoryPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
+  console.log("[history] page render");
+
   return (
     <div className="p-8">
       <div className="mx-auto max-w-xl">
